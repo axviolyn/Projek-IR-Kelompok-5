@@ -146,6 +146,13 @@ st.markdown(
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
+
+    .st.button {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
     </style>
     <div class="main-header">
         <h1>📄 Perangkuman </h1>
@@ -156,10 +163,10 @@ st.markdown(
 )
 
 # Sidebar: Pilih atau Tambah Dokumen
-st.sidebar.title("📂 Daftar Dokumen")
+st.sidebar.title("Perangkuman")
 
-# **Input Data Baru** dari User
-st.sidebar.subheader("✍️ Tambah Dokumen Baru")
+# *Input Data Baru* dari User
+st.sidebar.subheader("✍ Tambah Dokumen Baru")
 
 # Pilihan Input
 input_option = st.sidebar.radio("Pilih Cara Input Data", ["Unggah File", "Input Teks Manual"])
@@ -188,13 +195,13 @@ if input_option == "Unggah File":
             # Simpan file sesuai jenis aslinya
             if file_extension == "txt":
                 save_text_to_txt(DOCUMENTS_FOLDER, uploaded_file.name, content)
-                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai teks! (documents/{uploaded_file.name})")
+                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai teks!")
             elif file_extension == "docx":
                 save_text_to_docx(DOCUMENTS_FOLDER, uploaded_file.name, content)
-                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai dokumen Word! (documents/{uploaded_file.name})")
+                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai dokumen Word!")
             elif file_extension == "pdf":
                 save_text_to_pdf(DOCUMENTS_FOLDER, uploaded_file.name, content)
-                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai PDF! (documents/{uploaded_file.name})")
+                st.sidebar.success(f"File '{uploaded_file.name}' berhasil diunggah dan disimpan sebagai PDF!")
             else:
                 st.sidebar.error("Format file tidak dikenali dan tidak dapat disimpan.")
         else:
@@ -241,19 +248,28 @@ else:
 
     # Tampilkan isi dokumen yang dipilih
     st.markdown("<div class='content-box'>", unsafe_allow_html=True)
-    st.subheader(f"📄 Isi Dokumen: {selected_document}")
+
 
     document_path = os.path.join(DOCUMENTS_FOLDER, selected_document)
     document_content = read_file(document_path)
 
-    # Menampilkan konten dokumen
-    st.text_area("Konten Dokumen", document_content, height=400)
+# Buat dua kolom
+col1, col2 = st.columns(2)
 
-    # Tombol untuk membuat ringkasan
-    if st.button("Buat Ringkasan"):
+# Kolom pertama: Konten dokumen
+with col1:
+    st.subheader("📄 Konten Dokumen")
+    document_content = st.text_area("Isi Dokumen", document_content, height=400)
+    # Tambahkan tombol di bawah teks area di kolom pertama
+    if st.button("Buat Ringkasan", key="button_konten"):
         with st.spinner("Sedang merangkum dokumen..."):
             summary = compute_tf_idf_summary(document_content)
-            st.success("Ringkasan berhasil dibuat!")
-            st.subheader("📃 Ringkasan Dokumen")
-            st.write(summary)
-    st.markdown("</div>", unsafe_allow_html=True)
+
+# Kolom kedua: Hasil ringkasan
+with col2:
+    st.subheader("📃 Ringkasan Dokumen")
+    # Gunakan text_area untuk menampilkan hasil ringkasan
+    if "summary" in locals():
+        st.text_area("Hasil Ringkasan", summary, height=400)
+    else:
+        st.text_area("Hasil Ringkasan", "Belum ada ringkasan yang dibuat.", height=400)
